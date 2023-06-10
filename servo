@@ -1,0 +1,29 @@
+const request = require('request');
+const cheerio = require('cheerio');
+const fs = require('fs');
+
+// Make a request to the website
+const url = 'https://www.example.com';
+request(url, (error, response, body) => {
+  if (error) {
+    console.error(error);
+    return;
+  }
+
+  // Parse the HTML using Cheerio
+  const $ = cheerio.load(body);
+
+  // Find all image tags and extract the URLs
+  const imageUrls = [];
+  $('img').each((i, img) => {
+    const src = $(img).attr('src');
+    if (src) {
+      imageUrls.push(src);
+    }
+  });
+
+  // Download the images
+  imageUrls.forEach((url, i) => {
+    request(url).pipe(fs.createWriteStream(`image${i}.jpg`));
+  });
+});
